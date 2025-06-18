@@ -27,7 +27,7 @@ const noteSchema = new Schema({
 
 // create model
 const Note = model("Note", noteSchema)
-
+// create note data
 app.post("/notes/create-note", async (req: Request, res: Response) => {
     const noteData = req.body;
     //Approach -1 of creating a data
@@ -45,7 +45,7 @@ app.post("/notes/create-note", async (req: Request, res: Response) => {
     })
 })
 
-
+// get all notes
 app.get("/notes", async (req: Request, res: Response) => {
     const notes = await Note.find()
 
@@ -57,6 +57,7 @@ app.get("/notes", async (req: Request, res: Response) => {
 
 
 })
+// get single note
 app.get("/notes/:noteId", async (req: Request, res: Response) => {
     const id = req.params.noteId
     const note = await Note.findById(id)
@@ -69,6 +70,25 @@ app.get("/notes/:noteId", async (req: Request, res: Response) => {
 
 
 })
+// update single note
+app.patch("/notes/:noteId", async (req: Request, res: Response) => {
+    const id = req.params.noteId;
+    const noteData =req.body;
+    const note = await Note.findByIdAndUpdate(id,noteData)
+
+    res.status(201).json({
+        success: true,
+        message: " note updated successfully",
+        note
+    })
+
+
+})
+
+
+
+
+
 
 
 app.get("/", (req: Request, res: Response) => {
