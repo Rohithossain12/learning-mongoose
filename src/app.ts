@@ -5,8 +5,17 @@ const app: Application = express();
 
 // create schema
 const noteSchema = new Schema({
-    title: String,
-    content: String
+    title: { type: String, required: true, trim: true },
+    content: { type: String, default: "" },
+    category: {
+        type: String,
+        enum: ["personal", "work", "study", "other"],
+        default: "personal"
+    },
+    pinned: {
+        type: Boolean,
+        default: false,
+    }
 })
 
 // create model
@@ -15,7 +24,6 @@ const Note = model("Note", noteSchema)
 app.post("/create-note", async (req: Request, res: Response) => {
     const myNote = new Note({
         title: "Learning Mongoose",
-        content: "I am Learning Mongoose"
     })
 
     await myNote.save()
