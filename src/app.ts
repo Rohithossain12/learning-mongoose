@@ -70,11 +70,24 @@ app.get("/notes/:noteId", async (req: Request, res: Response) => {
 
 
 })
-// update single note
+// delete note
+app.delete("/notes/:noteId", async (req: Request, res: Response) => {
+    const id = req.params.noteId;
+    
+    const note = await Note.findByIdAndDelete(id)
+
+    res.status(201).json({
+        success: true,
+        message: " note delete successfully",
+        note
+    })
+
+
+})
 app.patch("/notes/:noteId", async (req: Request, res: Response) => {
     const id = req.params.noteId;
     const noteData =req.body;
-    const note = await Note.findByIdAndUpdate(id,noteData)
+    const note = await Note.findByIdAndUpdate(id,noteData,{new:true})
 
     res.status(201).json({
         success: true,
