@@ -3,6 +3,9 @@ import { model, Schema } from "mongoose";
 
 const app: Application = express();
 
+// Middleware
+app.use(express.json())
+
 // create schema
 const noteSchema = new Schema({
     title: { type: String, required: true, trim: true },
@@ -15,23 +18,56 @@ const noteSchema = new Schema({
     pinned: {
         type: Boolean,
         default: false,
+    },
+    tags: {
+        label: { type: String, required: true },
+        color: { type: String, default: "gray" }
     }
 })
 
 // create model
 const Note = model("Note", noteSchema)
 
-app.post("/create-note", async (req: Request, res: Response) => {
-    const myNote = new Note({
-        title: "Learning Mongoose",
-    })
+app.post("/notes/create-note", async (req: Request, res: Response) => {
+    const noteData = req.body;
+    //Approach -1 of creating a data
+    // const myNote = new Note({
+    //     title: "Learning Mongoose",
+    // })
+    // await myNote.save()
+    //Approach -2 
+    const note = await Note.create(noteData)
 
-    await myNote.save()
     res.status(201).json({
         success: true,
         message: "Note created Successfully",
-        note: myNote
+        note
     })
+})
+
+
+app.get("/notes", async (req: Request, res: Response) => {
+    const notes = await Note.find()
+
+    res.status(201).json({
+        success: true,
+        message: "get all notes successfully",
+        notes
+    })
+
+
+})
+app.get("/notes/:noteId", async (req: Request, res: Response) => {
+    const id = req.params.noteId
+    const note = await Note.findById(id)
+
+    res.status(201).json({
+        success: true,
+        message: "get single notes successfully",
+        note
+    })
+
+
 })
 
 
