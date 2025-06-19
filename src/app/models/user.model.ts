@@ -1,21 +1,44 @@
 import { model, Schema } from "mongoose";
+import validator from "validator"
 import { IUser } from "../interfaces/user.interface";
+
 
 const userSchema = new Schema<IUser>({
     firstName: {
         type: String,
-        required: true,
-        trim: true
+        required: [true, "First Name daw nai kno"],
+        trim: true,
+        minlength: [5, "First Name must be al least 5 characters gog {VALUE}"],
+        maxlength: 10,
     },
     lastName: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        minlength: 5,
+        maxlength: 10,
+    },
+    age: {
+        type: Number,
+        required: true,
+        min: 18,
+        max: 60,
     },
     email: {
         type: String,
+        unique: [true, "Email Common hoye gese!!"],
         required: true,
-        trim: true
+        lowercase: true,
+        trim: true,
+        // validate: {
+        //     validator: function (value) {
+        //         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+        //     },
+        //     message: function (props) {
+        //         return `Email ${props.value} is not valid email`
+        //     }
+        // }
+        validate: [validator.isEmail, "Invalid Email {VALUE}"]
     },
     password: {
         type: String,
@@ -23,11 +46,14 @@ const userSchema = new Schema<IUser>({
     },
     role: {
         type: String,
-        enum: ['user', 'admin'],
+        enum: {
+            values: ['user', 'admin'],
+            message: "Role is not valid. got {VALUE} role"
+        },
         default: 'user'
     }
 });
 
 
-export const User =model("User",userSchema)
+export const User = model("User", userSchema)
 
