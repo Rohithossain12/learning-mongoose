@@ -70,7 +70,9 @@ const userSchema = new Schema<IUser, UserStaticMethods, UserInstanceMethods>({
 
 }, {
     versionKey: false,
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
 
 userSchema.method("hashPassword", async function (plainPassword: string) {
@@ -94,7 +96,7 @@ userSchema.pre("save", async function (next) {
 });
 
 // Query Middleware
-userSchema.pre("find", async function ( next) {
+userSchema.pre("find", async function (next) {
     console.log("inside pre find hooks");
     next()
 })
@@ -102,19 +104,24 @@ userSchema.pre("find", async function ( next) {
 // Post Hooks
 
 // Document Middleware
-userSchema.post("save", function (doc,next) {
+userSchema.post("save", function (doc, next) {
     console.log(`${doc.email} has been saved`);
     next()
 })
 
 // delete user and user create all post delete
 // Query Middleware
-userSchema.post("findOneAndUpdate", async function (doc,next) {
+userSchema.post("findOneAndUpdate", async function (doc, next) {
     if (doc) {
         console.log(doc);
         await Note.deleteMany({ user: doc._id })
     }
     next()
+});
+
+userSchema.virtual("fullName").get(function () {
+    return `${this.firstName} ${this.lastName}`
+   
 })
 
 
