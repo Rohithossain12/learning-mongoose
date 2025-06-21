@@ -20,11 +20,22 @@ const createUserZodSchema = z.object(
 // create user data
 usersRoutes.post("/create-user", async (req: Request, res: Response) => {
     try {
-        const userData = req.body
-        const password = await bcrypt.hash(userData.password, 10);
-        userData.password = password
+        const body = req.body
+        // const password = await bcrypt.hash(userData.password, 10);
+        // userData.password = password
         // const userData = await createUserZodSchema.parseAsync(req.body)
-        const user = await User.create(userData)
+        //    built in and custom instance methods
+        // const user = new User(body)
+        // const password = await user.hashPassword(body.password)
+        // user.password = password 
+        // await user.save()
+
+        // built in and custom static methods
+        // const password = await User.hashPassword(body.password);
+        // console.log(password);
+        // body.password = password
+        const user = await User.create(body);
+
         res.status(201).json({
             success: true,
             message: " created user Successfully",
@@ -64,7 +75,8 @@ usersRoutes.get("/:userId", async (req: Request, res: Response) => {
 usersRoutes.delete("/:userId", async (req: Request, res: Response) => {
     const id = req.params.userId;
 
-    const user = await User.findByIdAndDelete(id)
+    // const user = await User.findByIdAndDelete(id)
+    const user =await User.findOneAndUpdate({_id:id})
 
     res.status(201).json({
         success: true,

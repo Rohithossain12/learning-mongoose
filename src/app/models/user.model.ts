@@ -1,6 +1,8 @@
-import { model, Schema } from "mongoose";
+import { Model, model, Schema } from "mongoose";
 import validator from "validator"
-import { IAddress, IUser } from "../interfaces/user.interface";
+import bcrypt from "bcryptjs";
+import { IAddress, IUser, UserInstanceMethods, UserStaticMethods } from "../interfaces/user.interface";
+import { Note } from "./notes.model";
 
 
 const addressSchema = new Schema<IAddress>({
@@ -13,7 +15,7 @@ const addressSchema = new Schema<IAddress>({
 
 
 
-const userSchema = new Schema<IUser>({
+const userSchema = new Schema<IUser, UserStaticMethods, UserInstanceMethods>({
     firstName: {
         type: String,
         required: [true, "First Name daw nai kno"],
@@ -66,11 +68,55 @@ const userSchema = new Schema<IUser>({
         type: addressSchema
     }
 
-},{
+}, {
     versionKey: false,
     timestamps: true
 });
 
+userSchema.method("hashPassword", async function (plainPassword: string) {
+    const password = await bcrypt.hash(plainPassword, 10);
+    return password
 
-export const User = model("User", userSchema)
+})
+userSchema.static("hashPassword", async function (plainPassword: string) {
+    const password = await bcrypt.hash(plainPassword, 10);
+    return password
+
+});
+
+
+// Pre Hooks
+// Document Middleware
+
+userSchema.pre("save", async function (next) {
+    this.password = await bcrypt.hash(this.password, 10);
+    next()
+});
+
+// Query Middleware
+userSchema.pre("find", async function ( next) {
+    console.log("inside pre find hooks");
+    next()
+})
+
+// Post Hooks
+
+// Document Middleware
+userSchema.post("save", function (doc,next) {
+    console.log(`${doc.email} has been saved`);
+    next()
+})
+
+// delete user and user create all post delete
+// Query Middleware
+userSchema.post("findOneAndUpdate", async function (doc,next) {
+    if (doc) {
+        console.log(doc);
+        await Note.deleteMany({ user: doc._id })
+    }
+    next()
+})
+
+
+export const User = model<IUser, UserStaticMethods>("User", userSchema)
 
